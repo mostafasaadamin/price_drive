@@ -1,0 +1,23 @@
+import 'package:flutter/material.dart';
+
+const primaryColor = Color(0xFFf26022);
+const primaryColorLight = Color(0xfff1804f);
+const textColor = Color(0xff888888);
+const hintColor = Color(0xffcfcfcf);
+const buttonTextColor = Color(0xff999999);
+const buttonColor = Color(0xffdadada);
+const errorColor = Color(0xfff00000);
+const containerBackgroundColor = Color(0xffededed);
+const headerColor = Color(0xff5a5a5a);
+const successColor = Color(0xff2c85eb);
+const darkColor = Color(0xff3f3f3f);
+const containerColor = Color(0xfff0f0f0);
+const progressColor = Color(0xffd9d9d9);
+const editFillColor = Color(0xfff1f1f1);
+const ticketColor = Color(0xffd6d6d6);
+const labelColorCode = Color(0xffb8b8b8);
+const successColor2 = Color(0xff48b564);
+const scaffoldColor = Color(0xffebebeb);
+const dividerColor = Color(0xffd3d3d3);
+const titleColor = Color(0xff2c2c2c);
+const titleDescColor = Color(0xff787878);
