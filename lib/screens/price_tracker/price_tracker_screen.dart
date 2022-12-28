@@ -11,20 +11,34 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:price_tracker/main.dart';
 import 'package:price_tracker/models/symbol_contract.dart';
 import 'package:price_tracker/screens/price_tracker/controller/price_tracker_controller_cubit.dart';
+import 'package:price_tracker/screens/price_tracker/controller/price_value_cubit.dart';
+import 'package:price_tracker/screens/price_tracker/controller/symbols_contract_cubit.dart';
 import 'package:price_tracker/theme/app_theme.dart';
 import 'package:price_tracker/theme/colors.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../../models/active_symbols.dart';
+import '../../models/price.dart';
 
 class ScreenTracker extends StatelessWidget {
   const ScreenTracker({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => getIt<PriceTrackerControllerCubit>(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => getIt<PriceTrackerControllerCubit>(),
+        ),
+
+        BlocProvider(
+          create: (context) => getIt<SymbolsContractCubit>(),
+        ),
+        BlocProvider(
+          create: (context) => getIt<PriceValueCubit>(),
+        ),
+      ],
       child: _Body(),
     );
   }
@@ -85,17 +99,38 @@ class _ScreenTrackerState extends State<_Body> {
 
                 const SizedBox(height: 25,),
 
-                BlocBuilder<PriceTrackerControllerCubit,
-                    PriceTrackerControllerState>(
+                BlocBuilder<SymbolsContractCubit,
+                    SymbolsContractState>(
                   builder: (context, state) {
-                    if (state is AssetsSpinnerLoading) {
+                    if (state is ContractSymbolsLoading) {
                       return const Center(
                         child: CircularProgressIndicator(),
                       );
-                    } else if (state is AssetsSpinnerLoaded) {
+                    } else if (state is ContractSymbolsLoaded) {
                       return _SymbolContractsDropDownWidget(state.contractListener);
                     } else {
-                      return Container();
+                      return  Center(
+                        child: Container(),
+                      );
+                    }
+                  },
+                ),
+
+
+
+                BlocBuilder<PriceValueCubit,
+                    PriceValueState>(
+                  builder: (context, state) {
+                    if (state is PriceDataLoading) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    } else if (state is PriceDataLoaded) {
+                      return _PriceStreamWidget(state.price);
+                    } else {
+                      return  Center(
+                        child: Container(),
+                      );
                     }
                   },
                 ),
@@ -121,15 +156,16 @@ class _MarketDropDownWidget extends StatelessWidget {
         stream: stream,
         builder: (context, snapshot) {
           List<ActiveSymbol> symbols = [];
+
           if (snapshot.hasData) {
             final response = jsonDecode(snapshot.data.toString());
+            print("Symbols${response}");
             if (response!['active_symbols'] != null) {
               response['active_symbols'].forEach((v) {
-                int index = symbols.indexWhere(
-                    (element) => element.displayName == v["display_name"]);
-                if (index == -1) {
-                  symbols.add(ActiveSymbol.fromJson(v));
-                }
+             print("IsContains${symbols.contains(ActiveSymbol.fromJson(v))}");
+               if(!symbols.contains(ActiveSymbol.fromJson(v))) {
+                 symbols.add(ActiveSymbol.fromJson(v));
+               }
               });
             }
           }
@@ -161,6 +197,10 @@ class _MarketDropDownWidget extends StatelessWidget {
                   context
                   .read<PriceTrackerControllerCubit>()
                   .setSelectedActiveSymbols(newValue);
+
+                  context
+                      .read<SymbolsContractCubit>()
+                      .getContractForSymbol(newValue!);
                 },
                 items:symbols
                     .map<DropdownMenuItem<ActiveSymbol>>((ActiveSymbol value) {
@@ -174,6 +214,31 @@ class _MarketDropDownWidget extends StatelessWidget {
   }
 }
 
+class _PriceStreamWidget extends StatelessWidget {
+  Stream stream;
+
+  _PriceStreamWidget(this.stream);
+
+  TextEditingController marketController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+     return StreamBuilder(
+        stream: stream,
+        builder: (context, snapshot) {
+          PriceProposal model;
+          if (snapshot.hasData) {
+            final response = jsonDecode(snapshot.data.toString());
+             model=PriceProposal.fromJson(response["echo_req"]);
+            return  Text("Current Price Is payout: \n ${model.payout} :\n askPrice: ${model.askPrice} Spot : \n ${model.spot}", style: const TextStyle(fontSize: 18));
+          }else{
+            return Container();
+          }
+
+        });
+  }
+}
+
 class _SymbolContractsDropDownWidget extends StatelessWidget {
   Stream stream;
 
@@ -183,16 +248,19 @@ class _SymbolContractsDropDownWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final contractBloc=context
+        .read<SymbolsContractCubit>();
      return StreamBuilder(
         stream: stream,
         builder: (context, snapshot) {
-          List<AvailableContract> symbolsContracts = [];
           if (snapshot.hasData) {
             final response = jsonDecode(snapshot.data.toString());
             debugPrint("ResponseIS${response}");
             if (response!['contracts_for']['available'] != null) {
               response['contracts_for']['available'].forEach((v) {
-                  symbolsContracts.add(AvailableContract.fromJson(v));
+               if(!contractBloc.symbolsContracts.contains(AvailableContract.fromJson(v))) {
+                 contractBloc.symbolsContracts.add(AvailableContract.fromJson(v));
+               }
               });
             }
           }
@@ -200,7 +268,7 @@ class _SymbolContractsDropDownWidget extends StatelessWidget {
               width: MediaQuery.of(context).size.width * 0.8,
               child: DropdownButtonFormField<AvailableContract>(
                 value: context
-                    .read<PriceTrackerControllerCubit>()
+                    .read<SymbolsContractCubit>()
                     .selectedSymbolContract,
                 icon: Icon(Icons.arrow_downward),
                 iconSize: 24,
@@ -215,21 +283,26 @@ class _SymbolContractsDropDownWidget extends StatelessWidget {
                 focusedBorder:const OutlineInputBorder(
                     borderSide: BorderSide(color: textColor, width: 1.0),
                     borderRadius: BorderRadius.all(Radius.circular(8.0))),
-                hintText:"Symbol",
-                label: Text("Symbol",
+                hintText:"contract",
+                label: Text("contract",
                   style: AppTheme.lookUpTextStyle,
                 ),
               ),
                 onChanged: (AvailableContract? newValue) {
                   context
-                  .read<PriceTrackerControllerCubit>()
+                  .read<SymbolsContractCubit>()
                   .setSelectedSymbolContract(newValue);
+
+                  context
+                  .read<PriceValueCubit>()
+                  .getPriceDetails(contract:newValue);
                 },
-                items:symbolsContracts
+                items:context
+                    .read<SymbolsContractCubit>().symbolsContracts
                     .map<DropdownMenuItem<AvailableContract>>((AvailableContract value) {
                   return DropdownMenuItem<AvailableContract>(
                     value: value,
-                    child: Text(value.exchangeName??""),
+                    child: Text('${value.contractDisplay}, ${value.contractType}'),
                   );
                 }).toList(),
               ));

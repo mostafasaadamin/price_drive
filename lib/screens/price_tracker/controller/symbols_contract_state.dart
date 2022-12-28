@@ -5,7 +5,9 @@ abstract class SymbolsContractState {}
 
 class SymbolsContractInitial extends SymbolsContractState {}
 
-class ContractSymbolsLoading extends SymbolsContractState {}
+class ContractSymbolsLoading extends SymbolsContractState {
+   ContractSymbolsLoading();
+}
 
 class ContractSymbolsLoaded extends SymbolsContractState {
   final Stream contractListener;
@@ -20,4 +22,19 @@ class ContractSymbolsLoaded extends SymbolsContractState {
 
   @override
   int get hashCode => contractListener.hashCode;
+}
+
+class ContractSymbolsTrackerError extends SymbolsContractState {
+  final String message;
+  ContractSymbolsTrackerError(this.message);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is ContractSymbolsTrackerError &&
+              runtimeType == other.runtimeType &&
+              message == other.message;
+
+  @override
+  int get hashCode => message.hashCode;
 }

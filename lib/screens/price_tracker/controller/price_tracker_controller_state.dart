@@ -5,7 +5,9 @@ abstract class PriceTrackerControllerState {}
 
 class PriceTrackerControllerInitial extends PriceTrackerControllerState {}
 
-class MarketSpinnerLoading extends PriceTrackerControllerState {}
+class MarketSpinnerLoading extends PriceTrackerControllerState {
+  MarketSpinnerLoading();
+}
 
 class MarketSpinnerLoaded extends PriceTrackerControllerState {
   final Stream symbolsListener;
@@ -37,24 +39,6 @@ class SelectedActiveSymbol extends PriceTrackerControllerState {
   int get hashCode => activeSymbol.hashCode;
 }
 
-
-// class PriceDataLoading extends PriceTrackerControllerState {}
-//
-// class PriceDataLoaded extends PriceTrackerControllerState {
-//   final Price price;
-//   PriceDataLoaded(this.price);
-//
-//   @override
-//   bool operator ==(Object other) =>
-//       identical(this, other) ||
-//       other is PriceDataLoaded &&
-//           runtimeType == other.runtimeType &&
-//           price == other.price;
-//
-//   @override
-//   int get hashCode => price.hashCode;
-// }
-//
 class PriceTrackerError extends PriceTrackerControllerState {
   final String message;
   PriceTrackerError(this.message);
