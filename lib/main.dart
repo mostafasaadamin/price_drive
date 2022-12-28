@@ -22,6 +22,7 @@ final getIt = GetIt.instance;
 void configureDependencies() => $initGetIt(getIt);
 
 void main() async {
+
   WidgetsFlutterBinding.ensureInitialized();
   configureDependencies();
 
@@ -47,6 +48,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]);
@@ -61,10 +63,7 @@ class _MyAppState extends State<MyApp> {
                 Locale('ar', ''),
                 Locale('en', 'US'),
               ],
-              home: BlocProvider(
-                create: (context) =>getIt<PriceTrackerControllerCubit>(),
-                child: ScreenTracker(),
-              ),
+              home: ScreenTracker(),
               initialRoute: priceTracker,
               onGenerateRoute: onGenerateRoute,
               opaqueRoute: Get.isOpaqueRouteDefault,

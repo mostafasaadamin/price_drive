@@ -1,162 +1,238 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:price_tracker/models/market.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:price_tracker/main.dart';
+import 'package:price_tracker/models/symbol_contract.dart';
 import 'package:price_tracker/screens/price_tracker/controller/price_tracker_controller_cubit.dart';
 import 'package:price_tracker/theme/app_theme.dart';
 import 'package:price_tracker/theme/colors.dart';
-import 'package:bloc/bloc.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-class ScreenTracker extends StatefulWidget {
+import 'package:web_socket_channel/io.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+
+import '../../models/active_symbols.dart';
+
+class ScreenTracker extends StatelessWidget {
   const ScreenTracker({Key? key}) : super(key: key);
 
   @override
-  State<ScreenTracker> createState() => _ScreenTrackerState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => getIt<PriceTrackerControllerCubit>(),
+      child: _Body(),
+    );
+  }
 }
 
-class _ScreenTrackerState extends State<ScreenTracker> {
+class _Body extends StatefulWidget {
+  const _Body({Key? key}) : super(key: key);
+
+  @override
+  State<_Body> createState() => _ScreenTrackerState();
+}
+
+class _ScreenTrackerState extends State<_Body> {
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final priceTrackerCubit = context.read<PriceTrackerControllerCubit>();
-      priceTrackerCubit.getMarketsGroup();
+      priceTrackerCubit.getActiveSymbolsGroup();
     });
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
-    // var isLoading=context.watch<CompanyDetailsInfoViewModel>().isLoading;
     return WillPopScope(
       onWillPop: () async {
         Get.back();
         return false;
       },
       child: Scaffold(
-          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-          appBar:AppBar(
-           title:const Text("Price Tracker"),
-          ),
-          backgroundColor: primaryColor,
-          body:
-          Stack(
-            fit: StackFit.expand,
-            children: [
-              SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children:[
-                    // _MarketDropDownWidget(),
-                    const SizedBox(height: 10),
-                    // _AssetsDropDownWidget()
-                  ],
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        appBar: AppBar(
+          title: const Text("Price Tracker"),
+        ),
+        backgroundColor: Colors.white,
+        body: Padding(
+          padding: const EdgeInsets.all(18.0),
+          child: SingleChildScrollView(
+
+            child: Column(
+              children: [
+                BlocBuilder<PriceTrackerControllerCubit,
+                    PriceTrackerControllerState>(
+                  builder: (context, state) {
+                    if (state is MarketSpinnerLoading) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    } else if (state is MarketSpinnerLoaded) {
+                      return  _MarketDropDownWidget(state.symbolsListener);
+                    } else {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                  },
                 ),
-              ),
-            ],
-          )
+
+                const SizedBox(height: 25,),
+
+                BlocBuilder<PriceTrackerControllerCubit,
+                    PriceTrackerControllerState>(
+                  builder: (context, state) {
+                    if (state is AssetsSpinnerLoading) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    } else if (state is AssetsSpinnerLoaded) {
+                      return _SymbolContractsDropDownWidget(state.contractListener);
+                    } else {
+                      return Container();
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
 }
 
-// class  _MarketDropDownWidget extends StatelessWidget {
-//   _MarketDropDownWidget({
-//     Key? key,
-//   }) : super(key: key);
-//
-//   TextEditingController marketController=TextEditingController();
-//   @override
-//   Widget build(BuildContext context) {
-//     // context.watch<CompanyDetailsInfoViewModel>().countriesGroup;
-//     // countryController.text=context.watch<CompanyDetailsInfoViewModel>().country?.nameForUi??"";
-//     return Container(
-//           width: MediaQuery.of(context).size.width*0.8,
-//           child:TypeAheadField<Market>(
-//             textFieldConfiguration: TextFieldConfiguration(
-//               controller:marketController,
-//               autofocus: false,
-//               style: AppTheme.lookUpTextStyle,
-//               decoration: InputDecoration(
-//                 filled: true,
-//                 fillColor: Colors.white,
-//                 border: const OutlineInputBorder(
-//                     borderSide: BorderSide(color: textColor, width: 1.0),
-//                     borderRadius: BorderRadius.all(Radius.circular(8.0))),
-//                 focusedBorder:const OutlineInputBorder(
-//                     borderSide: BorderSide(color: textColor, width: 1.0),
-//                     borderRadius: BorderRadius.all(Radius.circular(8.0))),
-//                 hintText:"Market",
-//                 label: Text("Market",
-//                   style: AppTheme.lookUpTextStyle,
-//                 ),
-//               ),
-//             ),
-//             // suggestionsCallback: context.read<CompanyDetailsInfoViewModel>().filteredCountries,
-//             itemBuilder: (context, suggestion) {
-//               return Padding(
-//                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-//                 child: Text(
-//                   "",
-//                   style: AppTheme.lookUpTextStyle,
-//                   textAlign: TextAlign.center,
-//                 ),
-//               );
-//             },
-//             onSuggestionSelected: (country) {
-//               // context.read<CompanyDetailsInfoViewModel>().setCountry(country);
-//             },
-//           )
-//       );
-//   }
-// }
+class _MarketDropDownWidget extends StatelessWidget {
+  Stream stream;
 
-// class  _AssetsDropDownWidget extends StatelessWidget {
-//   _AssetsDropDownWidget({
-//     Key? key,
-//   }) : super(key: key);
-//
-//   TextEditingController assetsController=TextEditingController();
-//   @override
-//   Widget build(BuildContext context) {
-//     // context.watch<CompanyDetailsInfoViewModel>().countriesGroup;
-//     // countryController.text=context.watch<CompanyDetailsInfoViewModel>().country?.nameForUi??"";
-//     return
-//       Container(
-//           width: MediaQuery.of(context).size.width*0.8,
-//           child:TypeAheadField<Market>(
-//             textFieldConfiguration: TextFieldConfiguration(
-//               controller:assetsController,
-//               autofocus: false,
-//               style: AppTheme.lookUpTextStyle,
-//               decoration: InputDecoration(
-//                 filled: true,
-//                 fillColor: Colors.white,
-//                 border: const OutlineInputBorder(
-//                     borderSide: BorderSide(color: textColor, width: 1.0),
-//                     borderRadius: BorderRadius.all(Radius.circular(8.0))),
-//                 focusedBorder:const OutlineInputBorder(
-//                     borderSide: BorderSide(color: textColor, width: 1.0),
-//                     borderRadius: BorderRadius.all(Radius.circular(8.0))),
-//                 hintText:"Market",
-//                 label: Text("Market",
-//                   style: AppTheme.lookUpTextStyle,
-//                 ),
-//               ),
-//             ),
-//             // suggestionsCallback: context.read<CompanyDetailsInfoViewModel>().filteredCountries,
-//             itemBuilder: (context, suggestion) {
-//               return Padding(
-//                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-//                 child: Text(
-//                   "",
-//                   style: AppTheme.lookUpTextStyle,
-//                   textAlign: TextAlign.center,
-//                 ),
-//               );
-//             },
-//             onSuggestionSelected: (country) {
-//               // context.read<CompanyDetailsInfoViewModel>().setCountry(country);
-//             },
-//           )
-//       );
-//   }
-// }
+  _MarketDropDownWidget(this.stream);
+
+  TextEditingController marketController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+     return StreamBuilder(
+        stream: stream,
+        builder: (context, snapshot) {
+          List<ActiveSymbol> symbols = [];
+          if (snapshot.hasData) {
+            final response = jsonDecode(snapshot.data.toString());
+            if (response!['active_symbols'] != null) {
+              response['active_symbols'].forEach((v) {
+                int index = symbols.indexWhere(
+                    (element) => element.displayName == v["display_name"]);
+                if (index == -1) {
+                  symbols.add(ActiveSymbol.fromJson(v));
+                }
+              });
+            }
+          }
+          return Container(
+              width: MediaQuery.of(context).size.width * 0.8,
+              child: DropdownButtonFormField<ActiveSymbol>(
+                value: context
+                    .read<PriceTrackerControllerCubit>()
+                    .selectedActiveSymbols,
+                icon: Icon(Icons.arrow_downward),
+                iconSize: 24,
+                elevation: 16,
+               style: AppTheme.lookUpTextStyle,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
+                border: const OutlineInputBorder(
+                    borderSide: BorderSide(color: textColor, width: 1.0),
+                    borderRadius: BorderRadius.all(Radius.circular(8.0))),
+                focusedBorder:const OutlineInputBorder(
+                    borderSide: BorderSide(color: textColor, width: 1.0),
+                    borderRadius: BorderRadius.all(Radius.circular(8.0))),
+                hintText:"Symbol",
+                label: Text("Symbol",
+                  style: AppTheme.lookUpTextStyle,
+                ),
+              ),
+                onChanged: (ActiveSymbol? newValue) {
+                  context
+                  .read<PriceTrackerControllerCubit>()
+                  .setSelectedActiveSymbols(newValue);
+                },
+                items:symbols
+                    .map<DropdownMenuItem<ActiveSymbol>>((ActiveSymbol value) {
+                  return DropdownMenuItem<ActiveSymbol>(
+                    value: value,
+                    child: Text(value.marketDisplayName??""),
+                  );
+                }).toList(),
+              ));
+        });
+  }
+}
+
+class _SymbolContractsDropDownWidget extends StatelessWidget {
+  Stream stream;
+
+  _SymbolContractsDropDownWidget(this.stream);
+
+  TextEditingController marketController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+     return StreamBuilder(
+        stream: stream,
+        builder: (context, snapshot) {
+          List<AvailableContract> symbolsContracts = [];
+          if (snapshot.hasData) {
+            final response = jsonDecode(snapshot.data.toString());
+            debugPrint("ResponseIS${response}");
+            if (response!['contracts_for']['available'] != null) {
+              response['contracts_for']['available'].forEach((v) {
+                  symbolsContracts.add(AvailableContract.fromJson(v));
+              });
+            }
+          }
+          return Container(
+              width: MediaQuery.of(context).size.width * 0.8,
+              child: DropdownButtonFormField<AvailableContract>(
+                value: context
+                    .read<PriceTrackerControllerCubit>()
+                    .selectedSymbolContract,
+                icon: Icon(Icons.arrow_downward),
+                iconSize: 24,
+                elevation: 16,
+               style: AppTheme.lookUpTextStyle,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
+                border: const OutlineInputBorder(
+                    borderSide: BorderSide(color: textColor, width: 1.0),
+                    borderRadius: BorderRadius.all(Radius.circular(8.0))),
+                focusedBorder:const OutlineInputBorder(
+                    borderSide: BorderSide(color: textColor, width: 1.0),
+                    borderRadius: BorderRadius.all(Radius.circular(8.0))),
+                hintText:"Symbol",
+                label: Text("Symbol",
+                  style: AppTheme.lookUpTextStyle,
+                ),
+              ),
+                onChanged: (AvailableContract? newValue) {
+                  context
+                  .read<PriceTrackerControllerCubit>()
+                  .setSelectedSymbolContract(newValue);
+                },
+                items:symbolsContracts
+                    .map<DropdownMenuItem<AvailableContract>>((AvailableContract value) {
+                  return DropdownMenuItem<AvailableContract>(
+                    value: value,
+                    child: Text(value.exchangeName??""),
+                  );
+                }).toList(),
+              ));
+        });
+  }
+}

@@ -43,8 +43,11 @@ dependencies:
   fluttertoast: ^8.0.9
   http_client_helper: ^2.0.3
   connectivity_plus:
-  bloc: ^6.0.1
-  flutter_bloc: ^6.0.1
+  bloc: ^8.1.0
+  flutter_bloc: ^8.1.1
+  package_info_plus:
+  device_info_plus:
+  web_socket_channel: ^2.2.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

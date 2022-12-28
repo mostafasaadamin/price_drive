@@ -8,54 +8,53 @@ class PriceTrackerControllerInitial extends PriceTrackerControllerState {}
 class MarketSpinnerLoading extends PriceTrackerControllerState {}
 
 class MarketSpinnerLoaded extends PriceTrackerControllerState {
-  final List<Market> market;
-  MarketSpinnerLoaded(this.market);
+  final Stream symbolsListener;
+  MarketSpinnerLoaded(this.symbolsListener);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is MarketSpinnerLoaded &&
           runtimeType == other.runtimeType &&
-          market == other.market;
+          symbolsListener == other.symbolsListener;
 
   @override
-  int get hashCode => market.hashCode;
+  int get hashCode => symbolsListener.hashCode;
 }
 
-class AssetsSpinnerLoading extends PriceTrackerControllerState {}
-
-class AssetsSpinnerLoaded extends PriceTrackerControllerState {
-  final List<Assets> assets;
-  AssetsSpinnerLoaded(this.assets);
+class SelectedActiveSymbol extends PriceTrackerControllerState {
+  final ActiveSymbol? activeSymbol;
+  SelectedActiveSymbol(this.activeSymbol);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is AssetsSpinnerLoaded &&
+      other is SelectedActiveSymbol &&
           runtimeType == other.runtimeType &&
-          assets == other.assets;
+          activeSymbol == other.activeSymbol;
 
   @override
-  int get hashCode => assets.hashCode;
+  int get hashCode => activeSymbol.hashCode;
 }
 
-class PriceDataLoading extends PriceTrackerControllerState {}
 
-class PriceDataLoaded extends PriceTrackerControllerState {
-  final Price price;
-  PriceDataLoaded(this.price);
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is PriceDataLoaded &&
-          runtimeType == other.runtimeType &&
-          price == other.price;
-
-  @override
-  int get hashCode => price.hashCode;
-}
-
+// class PriceDataLoading extends PriceTrackerControllerState {}
+//
+// class PriceDataLoaded extends PriceTrackerControllerState {
+//   final Price price;
+//   PriceDataLoaded(this.price);
+//
+//   @override
+//   bool operator ==(Object other) =>
+//       identical(this, other) ||
+//       other is PriceDataLoaded &&
+//           runtimeType == other.runtimeType &&
+//           price == other.price;
+//
+//   @override
+//   int get hashCode => price.hashCode;
+// }
+//
 class PriceTrackerError extends PriceTrackerControllerState {
   final String message;
   PriceTrackerError(this.message);
