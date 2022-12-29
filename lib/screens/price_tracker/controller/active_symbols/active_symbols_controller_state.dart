@@ -1,12 +1,23 @@
-part of 'price_tracker_controller_cubit.dart';
 
-@immutable
+
+
+
+import 'package:price_tracker/models/active_symbols.dart';
+
 abstract class PriceTrackerControllerState {}
 
 class PriceTrackerControllerInitial extends PriceTrackerControllerState {}
 
 class MarketSpinnerLoading extends PriceTrackerControllerState {
   MarketSpinnerLoading();
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MarketSpinnerLoading && runtimeType == other.runtimeType;
+
+  @override
+  int get hashCode => 0;
 }
 
 class MarketSpinnerLoaded extends PriceTrackerControllerState {

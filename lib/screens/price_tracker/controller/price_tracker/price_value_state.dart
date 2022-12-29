@@ -1,4 +1,5 @@
-part of 'price_value_cubit.dart';
+
+import 'package:flutter/material.dart';
 
 @immutable
 abstract class PriceValueState {}

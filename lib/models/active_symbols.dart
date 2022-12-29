@@ -47,17 +47,40 @@ class ActiveSymbol {
     symbolType = json['symbol_type'];
   }
 
-}
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ActiveSymbol &&
+          runtimeType == other.runtimeType &&
+          allowForwardStarting == other.allowForwardStarting &&
+          displayName == other.displayName &&
+          displayOrder == other.displayOrder &&
+          exchangeIsOpen == other.exchangeIsOpen &&
+          isTradingSuspended == other.isTradingSuspended &&
+          market == other.market &&
+          marketDisplayName == other.marketDisplayName &&
+          pip == other.pip &&
+          subgroup == other.subgroup &&
+          subgroupDisplayName == other.subgroupDisplayName &&
+          submarket == other.submarket &&
+          submarketDisplayName == other.submarketDisplayName &&
+          symbol == other.symbol &&
+          symbolType == other.symbolType;
 
-class EchoReq {
-  String? activeSymbols;
-  String? productType;
-
-  EchoReq({this.activeSymbols, this.productType});
-
-  EchoReq.fromJson(Map<String, dynamic> json) {
-    activeSymbols = json['active_symbols'];
-    productType = json['product_type'];
-  }
-
+  @override
+  int get hashCode =>
+      allowForwardStarting.hashCode ^
+      displayName.hashCode ^
+      displayOrder.hashCode ^
+      exchangeIsOpen.hashCode ^
+      isTradingSuspended.hashCode ^
+      market.hashCode ^
+      marketDisplayName.hashCode ^
+      pip.hashCode ^
+      subgroup.hashCode ^
+      subgroupDisplayName.hashCode ^
+      submarket.hashCode ^
+      submarketDisplayName.hashCode ^
+      symbol.hashCode ^
+      symbolType.hashCode;
 }

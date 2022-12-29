@@ -1,9 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:meta/meta.dart';
 import 'package:price_tracker/models/symbol_contract.dart';
 import 'package:price_tracker/repository/remote_repository/price_tracker.dart';
-part 'price_value_state.dart';
+import 'package:price_tracker/screens/price_tracker/controller/price_tracker/price_value_state.dart';
 
 @injectable
 class PriceValueCubit extends Cubit<PriceValueState> {
@@ -13,13 +12,13 @@ class PriceValueCubit extends Cubit<PriceValueState> {
 
 
   Future<void> getPriceDetails({AvailableContract? contract}) async {
-  emit(PriceDataLoading());
+   emit(PriceDataLoading());
   final priceDetails = await trackerRepository.getPriceDetails(contract: contract,);
   if (priceDetails.isError) {
     emit(PriceDataError("Couldn't fetch Data !!!??"));
     return;
   }
-  emit(PriceDataLoaded(priceDetails.asValue!.value));
+   emit(PriceDataLoaded(priceDetails.asValue!.value));
 }
 
 }

@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 import 'package:price_tracker/main.config.dart';
 import 'package:price_tracker/routes/router.dart';
 import 'package:price_tracker/routes/router_names.dart';
-import 'screens/price_tracker/controller/price_tracker_controller_cubit.dart';
+import 'screens/price_tracker/controller/active_symbols/active_symbols_controller_cubit.dart';
 import 'screens/price_tracker/price_tracker_screen.dart';
 import 'theme/app_theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

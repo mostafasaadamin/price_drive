@@ -1,12 +1,18 @@
-part of 'symbols_contract_cubit.dart';
 
-@immutable
 abstract class SymbolsContractState {}
 
 class SymbolsContractInitial extends SymbolsContractState {}
 
 class ContractSymbolsLoading extends SymbolsContractState {
    ContractSymbolsLoading();
+
+   @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ContractSymbolsLoading && runtimeType == other.runtimeType;
+
+  @override
+  int get hashCode => 0;
 }
 
 class ContractSymbolsLoaded extends SymbolsContractState {

@@ -1,15 +1,10 @@
 import 'dart:async';
-
 import 'package:bloc/bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:meta/meta.dart';
 import 'package:price_tracker/models/active_symbols.dart';
-import 'package:price_tracker/models/symbol_contract.dart';
-import 'package:price_tracker/models/market.dart';
-import 'package:price_tracker/models/price.dart';
 import 'package:price_tracker/repository/remote_repository/price_tracker.dart';
+import 'package:price_tracker/screens/price_tracker/controller/active_symbols/active_symbols_controller_state.dart';
 
-part 'price_tracker_controller_state.dart';
 
 @injectable
 class PriceTrackerControllerCubit extends Cubit<PriceTrackerControllerState> {

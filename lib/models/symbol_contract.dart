@@ -87,6 +87,54 @@ class AvailableContract {
         underlyingSymbol: json['underlying_symbol'],
       );
 
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AvailableContract &&
+          runtimeType == other.runtimeType &&
+          availableBarriers == other.availableBarriers &&
+          barrier == other.barrier &&
+          barrierCategory == other.barrierCategory &&
+          barriers == other.barriers &&
+          cancellationRange == other.cancellationRange &&
+          contractCategory == other.contractCategory &&
+          contractCategoryDisplay == other.contractCategoryDisplay &&
+          contractDisplay == other.contractDisplay &&
+          contractType == other.contractType &&
+          exchangeName == other.exchangeName &&
+          expiredBarriers == other.expiredBarriers &&
+          expiryType == other.expiryType &&
+          market == other.market &&
+          maxContractDuration == other.maxContractDuration &&
+          minContractDuration == other.minContractDuration &&
+          multiplierRange == other.multiplierRange &&
+          sentiment == other.sentiment &&
+          startType == other.startType &&
+          submarket == other.submarket &&
+          tradingPeriod == other.tradingPeriod &&
+          underlyingSymbol == other.underlyingSymbol;
 
-
+  @override
+  int get hashCode =>
+      availableBarriers.hashCode ^
+      barrier.hashCode ^
+      barrierCategory.hashCode ^
+      barriers.hashCode ^
+      cancellationRange.hashCode ^
+      contractCategory.hashCode ^
+      contractCategoryDisplay.hashCode ^
+      contractDisplay.hashCode ^
+      contractType.hashCode ^
+      exchangeName.hashCode ^
+      expiredBarriers.hashCode ^
+      expiryType.hashCode ^
+      market.hashCode ^
+      maxContractDuration.hashCode ^
+      minContractDuration.hashCode ^
+      multiplierRange.hashCode ^
+      sentiment.hashCode ^
+      startType.hashCode ^
+      submarket.hashCode ^
+      tradingPeriod.hashCode ^
+      underlyingSymbol.hashCode;
 }

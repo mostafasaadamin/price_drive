@@ -9,10 +9,12 @@ import 'package:get_it/get_it.dart' as _i1;
 import 'package:injectable/injectable.dart' as _i2;
 
 import 'repository/remote_repository/price_tracker.dart' as _i5;
-import 'screens/price_tracker/controller/price_tracker_controller_cubit.dart'
+import 'screens/price_tracker/controller/active_symbols/active_symbols_controller_cubit.dart'
     as _i6;
-import 'screens/price_tracker/controller/price_value_cubit.dart' as _i7;
-import 'screens/price_tracker/controller/symbols_contract_cubit.dart' as _i8;
+import 'screens/price_tracker/controller/price_tracker/price_value_cubit.dart'
+    as _i7;
+import 'screens/price_tracker/controller/symbols_contract/symbols_contract_cubit.dart'
+    as _i8;
 import 'services/connection_service.dart' as _i3;
 import 'services/message_service.dart'
     as _i4; // ignore_for_file: unnecessary_lambdas
