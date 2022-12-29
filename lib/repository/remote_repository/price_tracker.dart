@@ -92,11 +92,11 @@ class FavouriteRepository implements IPriceTracker {
       "subscribe": 1,
       "amount": 100,
       "basis": "payout",
-      "contract_type": contract?.contractType,
+      "contract_type":contract?.contractType,
       "currency": "USD",
       "duration": 1,
       "duration_unit": "m",
-      "symbol": contract?.underlyingSymbol,
+      "symbol":contract?.underlyingSymbol,
       "barrier": "+0.1"
     };
 
